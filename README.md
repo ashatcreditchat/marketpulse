@@ -1,17 +1,13 @@
-# ID2223-news-sentiment
-Project for ID2223
+# Market Pulse 
 
-Access to UI: https://news-sentiment-analyzer.web.app/
+Access to UI: https://marketpulse.idealiq.co/
 
-Developers: Farhad Madadzade & Calin Petrea
-
-Group number: 19
 
 # Project description
-This project is a sentiment analysis model for financial news headlines. The model is fine-tuned on the base data [Financial Phrasebank](https://huggingface.co/datasets/financial_phrasebank) dataset and [Zeroshot Twitter](https://huggingface.co/datasets/zeroshot/twitter-financial-news-sentiment). Every week, new features are collected by scraping Yahoo News and getting the sentiment of new news articles. The base model is then fine-tuned again but with the incremented dataset and if the newly fine-tuned model performs better than the prior version, this one is deployed. The model is then used by an app that we built that allows users to enter a search key and a maximum number of articles to analyze. The app then makes a request to the API to fetch the articles related to the search term from the past 7 days. The script in the API that does the scraping is a JavaScript version of the Python script that is used to collect new features every week. Our API is deployed using Google Cloud. The frontend app is deployed using Firebase and can be found on [News Sentiment Analyzer](https://news-sentiment-analyzer.web.app/). The model is deployed to [Huggingface.co](https://huggingface.co/Artanis1551/bert_sentiment_trainer?text=I+like+you.+I+love+you)
+This project demos a sentiment analysis model for financial news headlines. The model is fine-tuned on the base data [Financial Phrasebank](https://huggingface.co/datasets/financial_phrasebank) dataset and [Zeroshot Twitter](https://huggingface.co/datasets/zeroshot/twitter-financial-news-sentiment). Every week, new features are collected by scraping Yahoo News and getting the sentiment of new news articles. The base model is then fine-tuned again but with the incremented dataset and if the newly fine-tuned model performs better than the prior version, this one is deployed. The model is then used by an app that we built that allows users to enter a search key and a maximum number of articles to analyze. The app then makes a request to the API to fetch the articles related to the search term from the past 7 days. The script in the API that does the scraping is a JavaScript version of the Python script that is used to collect new features every week. Our API is deployed using Google Cloud. The frontend app is deployed using Firebase and can be found on [News Sentiment Analyzer](https://news-sentiment-analyzer.web.app/). The model is deployed to [Huggingface.co](https://huggingface.co/Artanis1551/bert_sentiment_trainer?text=I+like+you.+I+love+you)
 
 # Architecture diagram
-![Architecture diagram](./assets/architecture_id2223.jpg)
+![Architecture diagram](./assets/domainoverview.jpg)
 
 # Base dataset description:
 Our base dataset was based on two datasets. The first is [Financial Phrasebank](https://huggingface.co/datasets/financial_phrasebank) and the second is [Zeroshot Twitter](https://huggingface.co/datasets/zeroshot/twitter-financial-news-sentiment).
@@ -41,7 +37,7 @@ This folder contains all the necessary files for the API used by the app. This i
 ```
 
 ## sentiment_analysis_frontend
-All the files necessary for the front end and using the endpoint from the API as well as the inference API for the model on Huggingface. The front end is written in React, a popular JavaScript library for building user interfaces. It's responsible for displaying data to users and handling user interactions.
+All the files necessary for the front end and using the endpoint from the API as well as the inference API for the model on Huggingface. The front end is written in JavaScript/React 
 
 ## deploy_weekly_training.sh
 This is a shell script used for running a script on Modal for retraining the model weekly after new features have been collected. Using modal allows us to automate the process of triggering the training pipeline, ensuring that the model is regularly updated with fresh data.
