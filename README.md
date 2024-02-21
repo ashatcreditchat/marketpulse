@@ -101,8 +101,9 @@ npm install
 npm run dev
 ```
 
-## Run the frontend locally
-You vill need to install node (we used version 18). You also have to create a file in the sentiment_analysis_frontend folder called credentials.json that contains the following:
+## Run the frontend 
+
+Requires Node v18. You also have to create a file in the sentiment_analysis_frontend folder called credentials.json that contains the following:
 ```json
 {
     "huggingface": "<your huggingface API key>"
