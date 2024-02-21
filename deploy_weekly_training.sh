@@ -1,1 +1,1 @@
-modal deploy --name ID2223_project_weekly_training training_pipeline.py
+modal deploy --name weekly_training training_pipeline.py
