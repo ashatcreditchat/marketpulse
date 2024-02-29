@@ -1,6 +1,6 @@
 # Market Pulse 
 
-Access to UI: https://marketpulse.idealiq.co/
+Access to UI: [https://marketpulse.idealiq.co/](https://news-sentiment-analyzer.web.app/)
 
 
 # Project description
