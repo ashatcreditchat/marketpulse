@@ -1,18 +1,26 @@
 
 # Project description
-This project demos a sentiment analysis model for financial news headlines. The model is fine-tuned on the base data [Financial Phrasebank](https://huggingface.co/datasets/financial_phrasebank) dataset and [Zeroshot Twitter](https://huggingface.co/datasets/zeroshot/twitter-financial-news-sentiment). Every week, new features are collected by scraping Yahoo News and getting the sentiment of new news articles. The base model is then fine-tuned again but with the incremented dataset and if the newly fine-tuned model performs better than the prior version, this one is deployed. The model is then used by an app that we built that allows users to enter a search key and a maximum number of articles to analyze. The app then makes a request to the API to fetch the articles related to the search term from the past 7 days. The script in the API that does the scraping is a JavaScript version of the Python script that is used to collect new features every week. Our API is deployed using Google Cloud. The frontend app is deployed using Firebase and can be found on [News Sentiment Analyzer](https://news-sentiment-analyzer.web.app/). The model is deployed to [Huggingface.co](https://huggingface.co/Artanis1551/bert_sentiment_trainer?text=I+like+you.+I+love+you)
+This project demos a sentiment analysis model for financial news headlines. It's a simple prototype to demonstrate the data scraping concept, feature engineering (in OS Hopsworks), and natural language processing and inference via a (very) basic front-end.
+
+The model is fine-tuned on the base data [Financial Phrasebank](https://huggingface.co/datasets/financial_phrasebank) dataset and [Zeroshot Twitter](https://huggingface.co/datasets/zeroshot/twitter-financial-news-sentiment). Each week, new features are collected by scraping Yahoo News and getting the sentiment of new news articles. The base model is then fine-tuned again but with the incremented dataset and if the newly fine-tuned model performs better than the prior version, this one is deployed. The model is then used by an app that we built that allows users to enter a search key and a maximum number of articles to analyze. The app then makes a request to the API to fetch the articles related to the search term from the past 7 days. The script in the API that does the scraping is a JavaScript version of the Python script that is used to collect new features every week. Our API is deployed using Google Cloud. The frontend app is deployed using Firebase and can be found on [News Sentiment Analyzer](https://news-sentiment-analyzer.web.app/). The model is deployed to [Huggingface.co](https://huggingface.co/Artanis1551/bert_sentiment_trainer?text=I+like+you.+I+love+you)
 
 # Architecture diagram
 ![Architecture diagram](./assets/domainoverview.jpg)
 
 # Base dataset description:
-Our base dataset was based on two datasets. The first is [Financial Phrasebank](https://huggingface.co/datasets/financial_phrasebank) and the second is [Zeroshot Twitter](https://huggingface.co/datasets/zeroshot/twitter-financial-news-sentiment).
-Both datasets essentially include a text as well as a sentiment label. For FinancialPhraseBank it is negative, neutral, and positive, and for Zeroshot bearish, bullish, and neutral.
-The financial phrase bank dataset contains 4 subsets created based on how the annotators agreed on the labeling: 50%, 66%, 75%, and 100%. We used the one with 75% agreeance to maximize the size of our final dataset. Preprocessing was required to adapt between the different labeling used by the datasets so they could be combined. Ultimately the labels used by us were negative, positive, and neutral (mapped to 0, 1, and 2 in the feature store on Hopsworks).  
+Our base dataset is as follows: 
+
+1. The first is [Financial Phrasebank](https://huggingface.co/datasets/financial_phrasebank)
+2. The second is [Zeroshot Twitter](https://huggingface.co/datasets/zeroshot/twitter-financial-news-sentiment).
+
+Both datasets include a text as well as a sentiment label. For FinancialPhraseBank it is negative, neutral, and positive, and for Zeroshot bearish, bullish, and neutral. The financial phrase bank dataset contains 4 subsets created based on how the annotators agreed on the labeling: 50%, 66%, 75%, and 100%. We used the one with 75% agreeance to maximize the size of our final dataset. There is some simple preprocessing on the different labeling so they could be combined. Ultimately the labels used are simple negative, positive, and neutral (mapped to 0, 1, and 2 in the feature store on Hopsworks).  
 
 # Base model description:
-https://huggingface.co/bert-base-cased
-The BERT (Bidirectional Encoder Representations from Transformers) model is a transformers model that has been pre-trained on a large dataset of English data in a self-supervised fashion. It is a base model that has been pre-trained on the raw texts only, with no humans labeling them in any way. The model is case-sensitive. The model was pre-trained with two objectives: masked language modeling (MLM) and next sentence prediction (NSP). The MLM objective involves masking 15% of the words in the input sentence and predicting the masked words. The NSP objective involves concatenating two masked sentences as inputs during pre-training and predicting if the two sentences were following each other or not. The BERT model can be fine-tuned on a downstream task such as sequence classification, token classification, or question answering. The model is primarily aimed at being fine-tuned on tasks that use the whole sentence (potentially masked) to make decisions.
+https://huggingface.co/bert-base-cased 
+
+The BERT model is a base model pre-trained on the raw texts only, with no human labeling. The model was pre-trained with two objectives: masked language modeling (MLM) and next sentence prediction (NSP). The MLM objective involves masking 15% of the words in the input sentence and predicting the masked words. The NSP objective involves concatenating two masked sentences as inputs during pre-training and predicting if the two sentences were following each other or not. 
+
+The BERT model can be fine-tuned on a downstream task such as sequence classification, token classification, or question answering. The model is primarily aimed at being fine-tuned on tasks that use the whole sentence (potentially masked) to make decisions.
 This model was first introduced in this paper https://arxiv.org/pdf/1810.04805.pdf
 
 # Project files and folders:
@@ -33,19 +41,19 @@ This folder contains all the necessary files for the API used by the app. This i
 ```
 
 ## sentiment_analysis_frontend
-All the files necessary for the front end and using the endpoint from the API as well as the inference API for the model on Huggingface. The front end is written in JavaScript/React 
+All the files necessary for the front end and using the endpoint from the API as well as the inference API for the model on Huggingface. The front end is JS/React 
 
 ## deploy_weekly_training.sh
-This is a shell script used for running a script on Modal for retraining the model weekly after new features have been collected. Using modal allows us to automate the process of triggering the training pipeline, ensuring that the model is regularly updated with fresh data.
+This is a shell script used for retraining the model weekly after new features have been collected. Using modal allows us to automate the process of triggering the training pipeline, ensuring that the model is regularly updated with fresh data. (Beware: If you try to deploy this straight to your Azure env you will probably have CORS headaches and you won't understand why :)
 
 ## feature_pipeline_weekly.py
-This is the pipeline script that collects new features weekly by using the `yahoo_finance_news_scraper.py` module. The scraper collects 50 headlines from the past 7 days each of the search keys `AAPL`, `AMZN`, `GOOGL`, `MSFT`, `TSLA`. We then get their sentiment using the model [distilRoberta-financial-sentiment](https://huggingface.co/mrm8488/distilroberta-finetuned-financial-news-sentiment-analysis). In order for us to upload these feaures to Hopsworks we embedd the text for each feature using OpenAI's text embedder model [text-embedding-ada-002](https://huggingface.co/Xenova/text-embedding-ada-002). Once the new features are collected they are split into training and test sets and uploaded to the respective training and test feature groups on Hopsworks. This ensures that the model has a steady stream of new data to learn from.
+This is the pipeline script that collects new features weekly by using the `yahoo_finance_news_scraper.py` module. The scraper collects 50 headlines from the past 7 days each of the search keys `AAPL`, `AMZN`, `GOOGL`, `MSFT`, `TSLA`. We then get their sentiment using the model [distilRoberta-financial-sentiment](https://huggingface.co/mrm8488/distilroberta-finetuned-financial-news-sentiment-analysis) which is shared on HuggingFace. To upload the feaures to Hopsworks we embed the text for each feature using OpenAI's text embedder model [text-embedding-ada-002](https://huggingface.co/Xenova/text-embedding-ada-002). Once the new features are collected they are split into training and test sets and uploaded to the respective training and test feature groups on Hopsworks. This ensures that the model has a steady stream of new data to learn from.
 
 ## feature_pipeline.ipynb
-This is the notebook used to upload the initial features from the base dataset. The code is very similar to the weekly feature pipeline script but does not collect features using the scraping script. It is also here that we created the train and test feature groups on Hopsworks. This pipeline was only run once to create and initialize the feature groups.
+Py notebook used to upload the initial features from the base dataset. The code is very similar to the weekly feature pipeline script but does not collect features using the scraping script. It is also here that we created the train and test feature groups on Hopsworks. Run this once to create and initialize the feature groups in Hopsworks.
 
 ## hyperparameter_search.ipynb
-This is a notebook we used to make a hyperparameter search to find the optimal combination of hyperparameters for when we train the model. The optimal hyperparameter search was found using Optuna as the background to the hyperparameter_search method of the Trainer class from Huggingface. The optimal training arguments which we also end up using are the following:
+Py notebook to find the optimal combination of hyperparameters for training. Using Optuna as the background was a tip. The hyperparameters with the best loss are:
 
 ```python
 training_args = TrainingArguments(
@@ -74,7 +82,7 @@ training_args = TrainingArguments(
 
 
 ## preprocessing_pipeline.ipynb
-This notebook was used to preprocess the base data and collect them into csv files (for later use in feature_pipeline.ipynb) as well as figure out and test the text embedding tokenizer to see that it works as intended.
+Py notebook used to preprocess the base data and populate csv files (for later use in feature_pipeline.ipynb) as well as figure out and test the text embedding tokenizer to see that it works as intended.
 
 ## requirements.txt
 The requirements.txt file contains the modules needed to run the Python script.
